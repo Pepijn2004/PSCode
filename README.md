@@ -17,7 +17,7 @@ This is still in early development and will be updated very soon!
 _____________________________________________________________________________________________________________________
 
 <p align="center">
-  <img src="https://i.ibb.co/zVnNV34/pixil-frame-0.png" width="350" title="PSCode preview">
+  <img src="https://i.ibb.co/dgnGM8s/pixil-frame-0.png" width="350" title="PSCode preview">
 </p>
 
 
