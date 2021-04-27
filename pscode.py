@@ -1,5 +1,7 @@
 from PIL import Image, ImageDraw
 import math
+import os
+from time import sleep
 
 
 # Variables
@@ -46,6 +48,35 @@ def drawBit(bit, x, y):
 				row += 1
 		elif i % 2 != 0:
 			row += 1
+
+def readBit(image, x, y):
+	px = image.load()
+	row = 0
+	bit =""
+	for i in range(0,8):
+		if i % 2 == 0:
+				#left
+				if px[x, y + row] == (0,0,0):
+					bit = bit + "1"
+				elif px[x, y + row] == (255,255,255):
+					bit = bit + "0"
+				else:
+					print("ERROR\nImage is not an PSCode.")
+		else:
+				#right
+				if px[x+1, y + row] == (0,0,0):
+					bit = bit + "1"
+					row += 1
+				elif px[x+1, y + row] == (255,255,255):
+					bit = bit + "0"
+					row += 1
+				else:
+					print("ERROR\nImage is not an PSCode.")
+	return bit
+
+def readLenBit(img):
+	lenBit = readBit(img, 18,17)
+	return bitToInt(lenBit)
 
 def drawBits(rowCount, ASCIIbit):
 	for row in range(0, rowCount):
@@ -118,6 +149,11 @@ def drawTemplate():
 		if i % 2 == 0:
 			draw.point((20, i), fill=BLACK)
 
+def drawLenBit(string):
+	# Draws the lenght of the string as an 8bit int in the bottom-right cornor
+	bit = intToBit(len(string))
+	drawBit(bit, 18, 17)
+
 def stringToASCIIlist(string):
 	# Converts the strings characters into ASCII index numbers and stores them in a list.
 	ASCII = []
@@ -140,22 +176,132 @@ def makeBitList(ASCII):
 
 	return ASCIIbit
 
-def calcRows(list):
-	# Calculating the rows
-	return math.ceil((len(list) / 10))
+def calcRows(listOrInt):
+	# Calculating the rows for when to draw bits or read bits
+	# When reading it will take an int as arg, for drawing a list.
+	if type(listOrInt) == list:
+		return math.ceil((len(listOrInt) / 10))
+	elif type(listOrInt) == int:
+		return math.ceil(listOrInt / 10)
+	else:
+		print("Invalid argument. Must be an int or list.")
 
 def makePSCode(string, title):
+	if len(string) > 39:
+		print("Text is too long. PSCode only supports up to 40 characters of length.")
+		return
 	drawTemplate() # Draws PSCode template
 	ASCII = stringToASCIIlist(string) # Converts string into ASCII index for each letter => ASCII[]
 	ASCIIbit = makeBitList(ASCII) # Converts ASCII[] into 8bit => ASCIIbit[]
 	rowsCount = calcRows(ASCIIbit) # Calculates the rows needed to draw the data
+	drawLenBit(string)
 	drawBits(rowsCount, ASCIIbit) # Draws the actual bits on the PSCode.
 	saveImg(title) # Saves the PSCode as /<title>.png
 
 
+def readPSCode(imgPath):
+	try:
+		img = Image.open(imgPath) # Opens the image
+	except FileNotFoundError:
+		print("\nFile does not exist.")
+		sleep(1)
+		terminalMenu()
+	bitLen = readLenBit(img) # Reads the bit on BR cornor. Value is how many bits are on the PSCode
+	rowsCount = calcRows(bitLen) # Calculates the rows needed to draw the data on the PSCode
+	data = ""
+	for row in range(0, rowsCount):
+		for col in range(0, 10):
+			if bitLen == 1:
+				bit = readBit(img ,col * 2, row * 4 + 5)
+				data = data + chr(bitToInt(bit))
+				return data
+			else:
+				bit = readBit(img ,col * 2, row * 4 + 5)
+				data = data + chr(bitToInt(bit))
+				bitLen -= 1
+
+
+def terminalMenu():
+	uInp = ""
+	os.system('clear')
+	print(''' 
+
+	██████╗ ███████╗ ██████╗ ██████╗ ██████╗ ███████╗
+	██╔══██╗██╔════╝██╔════╝██╔═══██╗██╔══██╗██╔════╝
+	██████╔╝███████╗██║     ██║   ██║██║  ██║█████╗  
+	██╔═══╝ ╚════██║██║     ██║   ██║██║  ██║██╔══╝  
+	██║     ███████║╚██████╗╚██████╔╝██████╔╝███████╗
+	╚═╝     ╚══════╝ ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝
+	                                                 
+		Developed by Pepijn Siddiki
+		https://github.com/Pepijn2004/PSCode
+	——————————————————————————————————————————————————
+
+		CHOOSE AN OPTION:
+
+	1) Generate PSCode.
+	2) Read PSCode.
+	3) Quit
+
+		''')
+
+	uInp = input(">> ")
+
+	if uInp == "1":
+		print("\n	——————————————————————————————————————————————————\n")
+		string = input("PSCode data (max 40): ")
+		output = input("Name: ")
+		makePSCode(string, output)
+		print("\n	——————————————————————————————————————————————————\n")
+		print(f"PSCode generated as /{output}.png")
+		sleep(2)
+		terminalMenu()
+	elif uInp == "2":
+		print("\n	——————————————————————————————————————————————————\n")
+		string = input("PSCode path (/pscode.png): ")
+		data = readPSCode(string)
+		print(f'\n\nPSCODE Text: "{data}"')
+		input("\n\nPress enter to return to the menu.")
+		terminalMenu()
+		
+	elif uInp == "3":
+		os.system("clear")
+		print('''
+	 ██████╗  ██████╗  ██████╗ ██████╗ ██████╗ ██╗   ██╗███████╗
+	██╔════╝ ██╔═══██╗██╔═══██╗██╔══██╗██╔══██╗╚██╗ ██╔╝██╔════╝
+	██║  ███╗██║   ██║██║   ██║██║  ██║██████╔╝ ╚████╔╝ █████╗  
+	██║   ██║██║   ██║██║   ██║██║  ██║██╔══██╗  ╚██╔╝  ██╔══╝  
+	╚██████╔╝╚██████╔╝╚██████╔╝██████╔╝██████╔╝   ██║   ███████╗
+	 ╚═════╝  ╚═════╝  ╚═════╝ ╚═════╝ ╚═════╝    ╚═╝   ╚══════╝
+				''')
+		sleep(1)
+		system('clear')
+		quit()
+	else:
+		print("That's not an option")
+		sleep(2)
+		terminalMenu()
 
 
 
 if __name__ == '__main__':
-	print("~ PSCode Generator ~\n")
-	myPSCode = makePSCode("youtube.com/watch?v=5qap5aO4i9A", "test")
+	try:
+		terminalMenu()
+		#myPSCode = makePSCode("allehoppa", "test")
+		#data = readPSCode("test.png")
+		#print(data)
+	except:
+		os.system('clear')
+		print('''
+	 ██████╗  ██████╗  ██████╗ ██████╗ ██████╗ ██╗   ██╗███████╗
+	██╔════╝ ██╔═══██╗██╔═══██╗██╔══██╗██╔══██╗╚██╗ ██╔╝██╔════╝
+	██║  ███╗██║   ██║██║   ██║██║  ██║██████╔╝ ╚████╔╝ █████╗  
+	██║   ██║██║   ██║██║   ██║██║  ██║██╔══██╗  ╚██╔╝  ██╔══╝  
+	╚██████╔╝╚██████╔╝╚██████╔╝██████╔╝██████╔╝   ██║   ███████╗
+	 ╚═════╝  ╚═════╝  ╚═════╝ ╚═════╝ ╚═════╝    ╚═╝   ╚══════╝
+			''')
+		sleep(2)
+		os.system('clear')
+		quit()
+
+
