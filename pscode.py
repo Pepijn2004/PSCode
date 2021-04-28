@@ -1,6 +1,5 @@
 from PIL import Image, ImageDraw
-import math
-import os
+import math, os, platform
 from time import sleep
 
 
@@ -186,6 +185,14 @@ def calcRows(listOrInt):
 	else:
 		print("Invalid argument. Must be an int or list.")
 
+def clear():
+		# Clears the screen depending on OS
+		OS = platform.system()
+		if OS == "Windows":
+			os.system('cls')
+		else:
+			os.system('clear')
+
 def makePSCode(string, title):
 	if len(string) > 39:
 		print("Text is too long. PSCode only supports up to 40 characters of length.")
@@ -223,7 +230,6 @@ def readPSCode(imgPath):
 
 def terminalMenu():
 	uInp = ""
-	os.system('clear')
 	print(''' 
 
 	██████╗ ███████╗ ██████╗ ██████╗ ██████╗ ███████╗
@@ -265,7 +271,7 @@ def terminalMenu():
 		terminalMenu()
 		
 	elif uInp == "3":
-		os.system("clear")
+		clear()
 		print('''
 	 ██████╗  ██████╗  ██████╗ ██████╗ ██████╗ ██╗   ██╗███████╗
 	██╔════╝ ██╔═══██╗██╔═══██╗██╔══██╗██╔══██╗╚██╗ ██╔╝██╔════╝
@@ -275,7 +281,7 @@ def terminalMenu():
 	 ╚═════╝  ╚═════╝  ╚═════╝ ╚═════╝ ╚═════╝    ╚═╝   ╚══════╝
 				''')
 		sleep(1)
-		system('clear')
+		system('cls')
 		quit()
 	else:
 		print("That's not an option")
@@ -290,9 +296,10 @@ if __name__ == '__main__':
 		#myPSCode = makePSCode("allehoppa", "test")
 		#data = readPSCode("test.png")
 		#print(data)
-	except:
-		os.system('clear')
-		print('''
+	except KeyboardInterrupt:
+		clear()
+		print(f'''
+		
 	 ██████╗  ██████╗  ██████╗ ██████╗ ██████╗ ██╗   ██╗███████╗
 	██╔════╝ ██╔═══██╗██╔═══██╗██╔══██╗██╔══██╗╚██╗ ██╔╝██╔════╝
 	██║  ███╗██║   ██║██║   ██║██║  ██║██████╔╝ ╚████╔╝ █████╗  
@@ -301,7 +308,23 @@ if __name__ == '__main__':
 	 ╚═════╝  ╚═════╝  ╚═════╝ ╚═════╝ ╚═════╝    ╚═╝   ╚══════╝
 			''')
 		sleep(2)
-		os.system('clear')
+		clear()
+		quit()
+	except:
+		clear()
+		print(f'''
+	AN ERROR OCCURRED: {sys.exc_info()[0]}
+	{sys.exc_info()[0]}
+
+	 ██████╗  ██████╗  ██████╗ ██████╗ ██████╗ ██╗   ██╗███████╗
+	██╔════╝ ██╔═══██╗██╔═══██╗██╔══██╗██╔══██╗╚██╗ ██╔╝██╔════╝
+	██║  ███╗██║   ██║██║   ██║██║  ██║██████╔╝ ╚████╔╝ █████╗  
+	██║   ██║██║   ██║██║   ██║██║  ██║██╔══██╗  ╚██╔╝  ██╔══╝  
+	╚██████╔╝╚██████╔╝╚██████╔╝██████╔╝██████╔╝   ██║   ███████╗
+	 ╚═════╝  ╚═════╝  ╚═════╝ ╚═════╝ ╚═════╝    ╚═╝   ╚══════╝
+			''')
+		sleep(5)
+		clear()
 		quit()
 
 
