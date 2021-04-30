@@ -164,7 +164,7 @@ def stringToASCIIlist(string):
 
 def saveImg(title):
 	img.save(f'{title}.png')
-	Image.open("test.png").show()
+	Image.open(f"{title}.png").show()
 	print(f"Generated PSCode!\nSaved as /{title}.png")
 
 def makeBitList(ASCII):
