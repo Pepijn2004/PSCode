@@ -1,6 +1,8 @@
 from PIL import Image, ImageDraw
-import math, os, platform
+import math, os, platform, sys
 from time import sleep
+import cv2
+import numpy as np
 
 
 # Variables
@@ -226,7 +228,24 @@ def readPSCode(imgPath):
 				bit = readBit(img ,col * 2, row * 4 + 5)
 				data = data + chr(bitToInt(bit))
 				bitLen -= 1
+def readPSCodeFromImg():
+	cap = cv2.VideoCapture(0) # device for webcam 0
+	while True:
+		ret, frame = cap.read() # ret = error, frame = the cap
+		frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+		corners = cv2.goodFeaturesToTrack(frame, 100, 0.99, 200)
+		corners = np.int0(corners)
+		for corner in corners:
+			x, y = corner.ravel()
+			cv2.circle(frame, (x, y), 20, (0,255,0), -1)
+			
+		cv2.imshow('Scan your PSCode', frame)
+		if cv2.waitKey(1) == ord('q'):
+			break
+	cap.release() # Disables camera for this script so other programs can access it
+	cv2.destroyAllWindows() # Closes any cv2 window
 
+	
 
 def terminalMenu():
 	uInp = ""
@@ -247,7 +266,8 @@ def terminalMenu():
 
 	1) Generate PSCode.
 	2) Read PSCode.
-	3) Quit
+	3) Read PSCode from webcam.
+	4) Quit
 
 		''')
 
@@ -269,8 +289,12 @@ def terminalMenu():
 		print(f'\n\nPSCODE Text: "{data}"')
 		input("\n\nPress enter to return to the menu.")
 		terminalMenu()
-		
+	
 	elif uInp == "3":
+		print("\n	——————————————————————————————————————————————————\n")
+		readPSCodeFromImg()
+		terminalMenu()
+	elif uInp == "4":
 		clear()
 		print('''
 	 ██████╗  ██████╗  ██████╗ ██████╗ ██████╗ ██╗   ██╗███████╗
@@ -281,7 +305,7 @@ def terminalMenu():
 	 ╚═════╝  ╚═════╝  ╚═════╝ ╚═════╝ ╚═════╝    ╚═╝   ╚══════╝
 				''')
 		sleep(1)
-		system('cls')
+		clear()
 		quit()
 	else:
 		print("That's not an option")
@@ -310,21 +334,21 @@ if __name__ == '__main__':
 		sleep(2)
 		clear()
 		quit()
-	except:
-		clear()
-		print(f'''
-	AN ERROR OCCURRED: {sys.exc_info()[0]}
-	{sys.exc_info()[0]}
+	# except:
+	# 	clear()
+	# 	print(f'''
+	# AN ERROR OCCURRED:
+	# {sys.exc_info()[0]}
 
-	 ██████╗  ██████╗  ██████╗ ██████╗ ██████╗ ██╗   ██╗███████╗
-	██╔════╝ ██╔═══██╗██╔═══██╗██╔══██╗██╔══██╗╚██╗ ██╔╝██╔════╝
-	██║  ███╗██║   ██║██║   ██║██║  ██║██████╔╝ ╚████╔╝ █████╗  
-	██║   ██║██║   ██║██║   ██║██║  ██║██╔══██╗  ╚██╔╝  ██╔══╝  
-	╚██████╔╝╚██████╔╝╚██████╔╝██████╔╝██████╔╝   ██║   ███████╗
-	 ╚═════╝  ╚═════╝  ╚═════╝ ╚═════╝ ╚═════╝    ╚═╝   ╚══════╝
-			''')
-		sleep(5)
-		clear()
-		quit()
+	#  ██████╗  ██████╗  ██████╗ ██████╗ ██████╗ ██╗   ██╗███████╗
+	# ██╔════╝ ██╔═══██╗██╔═══██╗██╔══██╗██╔══██╗╚██╗ ██╔╝██╔════╝
+	# ██║  ███╗██║   ██║██║   ██║██║  ██║██████╔╝ ╚████╔╝ █████╗  
+	# ██║   ██║██║   ██║██║   ██║██║  ██║██╔══██╗  ╚██╔╝  ██╔══╝  
+	# ╚██████╔╝╚██████╔╝╚██████╔╝██████╔╝██████╔╝   ██║   ███████╗
+	#  ╚═════╝  ╚═════╝  ╚═════╝ ╚═════╝ ╚═════╝    ╚═╝   ╚══════╝
+	# 		''')
+	# 	sleep(5)
+	# 	clear()
+	# 	quit()
 
 
